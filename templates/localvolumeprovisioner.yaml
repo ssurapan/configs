@@ -13,7 +13,7 @@ metadata:
 spec:
   kubernetes:
     minSupportedVersion: v1.15.0
-  namespace: kube-system 
+  namespace: kube-system
   cloudProvider:
     - name: aws
       enabled: false
@@ -31,6 +31,8 @@ spec:
             volumeBindingMode: WaitForFirstConsumer
     - name: docker
       enabled: true
+    - name: azure
+      enabled: true    
     - name: none
       enabled: true
   chartReference:

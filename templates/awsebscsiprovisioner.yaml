@@ -15,6 +15,8 @@ spec:
     minSupportedVersion: v1.15.0
   namespace: kube-system
   cloudProvider:
+    - name: azure
+      enabled: false    
     - name: aws
       enabled: true
   chartReference:
