@@ -23,8 +23,8 @@ spec:
       kubeaddons.mesosphere.io/provides: ingresscontroller
   chartReference:
     chart: dex
-    repo: https://mesosphere.github.io/charts/stable
-    version: 1.6.5
+    repo: https://timaa2k.github.io/charts
+    version: 1.6.6
     values: |
       ---
       # Temporarily we're going to use our custom built container. Documentation
