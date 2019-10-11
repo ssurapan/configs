@@ -32,8 +32,8 @@ spec:
       enabled: true
   chartReference:
     chart: prometheus-operator
-    repo: https://mesosphere.github.io/charts/staging
-    version: 5.19.1
+    repo: https://gracedo.github.io/charts/staging
+    version: 5.19.2
     values: |
       ---
       defaultRules:
@@ -46,6 +46,24 @@ spec:
           # addon alert rules are defaulted to false to prevent potential misfires if addons
           # are disabled.
           velero: false
+        # The following namespaces and configmaps permissions are needed to
+        # grab the kube-system namespace uid and write it out to a configmap.
+        # This is run in the "get-cluster-id" container in the Prometheus pod,
+        # see: https://github.com/mesosphere/kubeaddons-extrasteps/tree/master/pkg/prometheus/prometheus.go
+        additionalPrometheusRBACRules:
+          - apiGroups:
+              - ""
+            resources:
+              - namespaces
+            verbs:
+              - get
+          - apiGroups:
+              - ""
+            resources:
+              - configmaps
+            verbs:
+              - get
+              - create
       prometheus:
         additionalServiceMonitors:
           - name: kubeaddons-service-monitor-metrics
@@ -90,6 +108,23 @@ spec:
           thanos:
             baseImage: thanosio/thanos
             version: v0.4.0
+          externalLabels:
+            cluster: $(CLUSTER_ID)
+          containers:
+            - name: get-cluster-id
+              image: mesosphere/kubeaddons-addon-initializer:v0.0.12
+              command: ["/bin/bash", "-c", "addon-initializer prometheus && while true; do sleep 86400; done"]
+              env:
+              - name: "PROMETHEUS_NAMESPACE"
+                value: "kubeaddons"
+              - name: "CLUSTER_ID_CONFIGMAP_NAME"
+                value: "cluster-info-configmap"
+              - name: "KUBESYSTEM_NAMESPACE"
+                value: "kube-system"
+            - name: prometheus-config-reloader
+              envFrom:
+              - configMapRef:
+                  name: cluster-info-configmap
           additionalScrapeConfigs:
             - job_name: 'kubernetes-nodes-containerd'
               metrics_path: /v1/metrics
