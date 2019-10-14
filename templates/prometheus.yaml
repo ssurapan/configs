@@ -46,24 +46,10 @@ spec:
           # addon alert rules are defaulted to false to prevent potential misfires if addons
           # are disabled.
           velero: false
-        # The following namespaces and configmaps permissions are needed to
-        # grab the kube-system namespace uid and write it out to a configmap.
-        # This is run in the "get-cluster-id" container in the Prometheus pod,
+        # This option grants the Prometheus pod the necessary permissions that the
+        # "get-cluster-id" container defined in prometheus.prometheusSpec.containers requires.
         # see: https://github.com/mesosphere/kubeaddons-extrasteps/tree/master/pkg/prometheus/prometheus.go
-        additionalPrometheusRBACRules:
-          - apiGroups:
-              - ""
-            resources:
-              - namespaces
-            verbs:
-              - get
-          - apiGroups:
-              - ""
-            resources:
-              - configmaps
-            verbs:
-              - get
-              - create
+        enableAdditionalPrometheusRBACRules: true
       prometheus:
         additionalServiceMonitors:
           - name: kubeaddons-service-monitor-metrics
@@ -111,6 +97,8 @@ spec:
           externalLabels:
             cluster: $(CLUSTER_ID)
           containers:
+            # note: in order to run this container, mesosphereResources.enableAdditionalPrometheusRBACRules
+            # needs to be set to true
             - name: get-cluster-id
               image: mesosphere/kubeaddons-addon-initializer:v0.0.12
               command: ["/bin/bash", "-c", "addon-initializer prometheus && while true; do sleep 86400; done"]
