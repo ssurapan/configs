@@ -32,7 +32,19 @@ spec:
     - name: docker
       enabled: true
     - name: azure
-      enabled: true    
+      enabled: true
+      values: |
+        # Multiple storage classes can be defined here. This allows to, e.g.,
+        # distinguish between different disk types.
+        # For each entry a storage class '$name' and
+        # a host folder '/mnt/$dirName' will be created. Volumes mounted to this
+        # folder are made available in the storage class.
+        storageclasses:
+          - name: localvolumeprovisioner
+            dirName: disks
+            isDefault: false
+            reclaimPolicy: Delete
+            volumeBindingMode: WaitForFirstConsumer
     - name: none
       enabled: true
   chartReference:
