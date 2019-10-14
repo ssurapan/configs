@@ -35,3 +35,11 @@ spec:
           requests:
             cpu: 100m
             memory: 128Mi
+      opsportal:
+        ingress:
+          paths:
+            # harbor
+            - backend:
+                serviceName: harbor
+                servicePort: 8089
+              path: /ops/portal/harbor
